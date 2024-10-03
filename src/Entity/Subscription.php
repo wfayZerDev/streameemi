@@ -3,6 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\SubscriptionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SubscriptionRepository::class)]
@@ -13,17 +16,32 @@ class Subscription
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 100)]
     private ?string $name = null;
 
-    #[ORM\Column]
-    private ?int $price = null;
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $price = null;
 
-    #[ORM\Column]
-    private ?int $duration = null;
+    #[ORM\Column(nullable: true)]
+    private ?int $durationInMonth = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'currentSubscriptionId')]
+    private Collection $users;
+
+    /**
+     * @var Collection<int, SubscriptionHistory>
+     */
+    #[ORM\ManyToMany(targetEntity: SubscriptionHistory::class, mappedBy: 'subscriptionId')]
+    private Collection $subscriptionHistories;
+
+    public function __construct()
+    {
+        $this->users = new ArrayCollection();
+        $this->subscriptionHistories = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -42,38 +60,83 @@ class Subscription
         return $this;
     }
 
-    public function getPrice(): ?int
+    public function getPrice(): ?string
     {
         return $this->price;
     }
 
-    public function setPrice(int $price): static
+    public function setPrice(?string $price): static
     {
         $this->price = $price;
 
         return $this;
     }
 
-    public function getDuration(): ?int
+    public function getDurationInMonth(): ?int
     {
-        return $this->duration;
+        return $this->durationInMonth;
     }
 
-    public function setDuration(int $duration): static
+    public function setDurationInMonth(?int $durationInMonth): static
     {
-        $this->duration = $duration;
+        $this->durationInMonth = $durationInMonth;
 
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
     {
-        return $this->createdAt;
+        return $this->users;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function addUser(User $user): static
     {
-        $this->createdAt = $createdAt;
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->setCurrentSubscriptionId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): static
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getCurrentSubscriptionId() === $this) {
+                $user->setCurrentSubscriptionId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SubscriptionHistory>
+     */
+    public function getSubscriptionHistories(): Collection
+    {
+        return $this->subscriptionHistories;
+    }
+
+    public function addSubscriptionHistory(SubscriptionHistory $subscriptionHistory): static
+    {
+        if (!$this->subscriptionHistories->contains($subscriptionHistory)) {
+            $this->subscriptionHistories->add($subscriptionHistory);
+            $subscriptionHistory->addSubscriptionId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSubscriptionHistory(SubscriptionHistory $subscriptionHistory): static
+    {
+        if ($this->subscriptionHistories->removeElement($subscriptionHistory)) {
+            $subscriptionHistory->removeSubscriptionId($this);
+        }
 
         return $this;
     }
