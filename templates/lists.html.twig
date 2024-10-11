@@ -60,7 +60,7 @@
                 </div>
 
                 <div class="relative w-full flex text-gray-700 font-medium">
-                    <select class="appearance-none w-full bg-white border border-gray-200 px-7 py-3 rounded-md shadow transition">
+                    <select id="playlistSelect" class="appearance-none w-full bg-white border border-gray-200 px-7 py-3 rounded-md shadow transition">
                     {% for playlist in playlists %}
                         <option value="{{ playlist.id }}">{{ playlist.name }}</option>
                     {% endfor %}
@@ -80,6 +80,13 @@
 
         <section class="mt-9">
             <ul class="grid grid-cols-2 gap-y-5 sm:grid-cols-3 gap-x-5">
+
+                {% for playlistMedia in currentPlaylist.playlistMedia %}
+                {% set Media = playlistMedia.media %}
+                    {% include 'parts/pages/movies/movie_card.html.twig' %}
+                {% endfor %}
+                    <span>test</span>
+
 
                 {% include 'parts/pages/movies/movie_card.html.twig' %}
                 {% include 'parts/pages/movies/movie_card.html.twig' %}
@@ -101,6 +108,14 @@
 
     {% include 'parts/structure/right-sidebar.html.twig' %}
 </div>
+
+
+<script>
+document.getElementById('playlistSelect').addEventListener('change', function() {
+    document.location.href = "{{ path('show_my_list') }}?playlist=" + this.value;
+});
+
+</script>
 
 </body>
 
