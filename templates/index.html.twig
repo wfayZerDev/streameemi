@@ -86,7 +86,7 @@
                 </div>
 
                 <ul class="mt-4 grid grid-cols-2 gap-y-5 sm:grid-cols-3 gap-x-5 ">
-                    {% for i in 0..100 %}
+                    {% for movie in movies %}
                         {% include 'parts/pages/homepage_card.html.twig' %}
                     {% endfor %}
                 </ul>
