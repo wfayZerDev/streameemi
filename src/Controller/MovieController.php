@@ -8,16 +8,22 @@ use App\Entity\Movie;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Repository\MediaRepository;
 
 class MovieController extends AbstractController
 {
-    #[Route('/movie/{id}', name: 'movie_list')]
-    public function index(Movie $movie): Response
+    #[Route('/media/{id}', name: 'movie_list')]
+    public function index(MediaRepository $mediaRepository, int $id): Response
     {
-        dump($movie);
+        $media = $mediaRepository->find($id);
+
+        if (!$media) {
+            throw $this->createNotFoundException('The media does not exist');
+        }
 
         return $this->render('movie/detail.html.twig', [
-            'movie' => $movie,
+            'media' => $media,
         ]);
+
     }
 }
