@@ -13,9 +13,6 @@ use Doctrine\ORM\Mapping\Entity;
 #[Entity(repositoryClass: SerieRepository::class)]
 class Serie extends Media
 {
-    /**
-     * @var Collection<int, Season>
-     */
     #[ORM\OneToMany(targetEntity: Season::class, mappedBy: 'serie')]
     private Collection $seasons;
 
@@ -23,6 +20,7 @@ class Serie extends Media
     {
         parent::__construct();
         $this->seasons = new ArrayCollection();
+        $this->MediaType = ''; // Initialisation de la propriété MediaType
     }
 
     /**
@@ -53,5 +51,10 @@ class Serie extends Media
         }
 
         return $this;
+    }
+
+    public function getMediaType(): ?string
+    {
+        return "serie";
     }
 }
